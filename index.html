@@ -2,76 +2,233 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Jimpitan RT 16</title>
     <link rel="manifest" href="manifest.json">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: Arial, sans-serif; background: #f4f6f9; padding: 20px; font-size: 18px; margin: 0; }
-        .container { max-width: 500px; margin: auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        h2 { text-align: center; color: #2c3e50; font-size: 24px; margin-bottom: 25px; }
-        .form-group { margin-bottom: 20px; }
-        label { display: block; font-weight: bold; margin-bottom: 8px; color: #34495e; }
-        input, select, textarea { width: 100%; padding: 15px; box-sizing: border-box; border: 2px solid #bdc3c7; border-radius: 8px; font-size: 18px; }
-        input:focus, select:focus { border-color: #3498db; outline: none; }
-        .btn { width: 100%; background: #2ecc71; color: white; padding: 18px; border: none; border-radius: 8px; font-size: 20px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .btn:active { background: #27ae60; }
-        #preview { width: 100%; max-height: 250px; object-fit: cover; border-radius: 8px; display: none; margin-top: 10px; border: 2px dashed #bdc3c7; }
-        #success-screen { display: none; text-align: center; padding: 40px 20px; }
-        .success-icon { font-size: 60px; color: #2ecc71; }
+        :root {
+            --primary: #10b981; /* Hijau modern */
+            --primary-dark: #059669;
+            --bg-color: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --border-light: #e5e7eb;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+
+        body { background-color: var(--bg-color); color: var(--text-main); padding-bottom: 40px; }
+
+        /* Header bergaya aplikasi native */
+        .app-header {
+            background: var(--primary);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .app-header h1 { font-size: 20px; font-weight: 700; letter-spacing: 0.5px; }
+        .app-header p { font-size: 13px; opacity: 0.9; margin-top: 4px; font-weight: 400; }
+
+        .container {
+            max-width: 500px;
+            margin: 24px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 28px 24px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+        }
+
+        .form-group { margin-bottom: 24px; position: relative; }
+        
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 10px;
+        }
+
+        /* Input ala iOS/Material Design */
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 16px;
+            background: #f9fafb;
+            border: 2px solid var(--border-light);
+            border-radius: 12px;
+            font-size: 18px;
+            color: var(--text-main);
+            transition: all 0.3s ease;
+        }
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+        }
+        input::placeholder { color: #9ca3af; }
+
+        /* Area Kamera Interaktif */
+        .upload-area {
+            display: block;
+            background: #f0fdf4;
+            border: 2px dashed var(--primary);
+            border-radius: 16px;
+            padding: 30px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .upload-area:active { background: #dcfce7; }
+        .upload-area input[type="file"] { display: none; }
+        
+        .upload-icon {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: 60px;
+            height: 60px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            margin-bottom: 12px;
+        }
+        .upload-icon svg { width: 32px; height: 32px; }
+        .upload-text { font-size: 16px; font-weight: 600; color: var(--primary-dark); }
+        .upload-subtext { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+
+        /* Pratinjau Foto */
+        #preview {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 12px;
+            display: none;
+            margin-top: 16px;
+            border: 1px solid var(--border-light);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Tombol Utama */
+        .btn-submit {
+            width: 100%;
+            background: var(--primary);
+            color: white;
+            padding: 18px;
+            border: none;
+            border-radius: 14px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 10px;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            transition: transform 0.1s, background 0.2s;
+        }
+        .btn-submit:active { transform: scale(0.98); background: var(--primary-dark); }
+
+        /* Layar Sukses (Optimistic UI) */
+        #success-screen {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+        }
+        .success-circle {
+            width: 80px; height: 80px;
+            background: #dcfce7;
+            border-radius: 50%;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        .success-circle svg { width: 40px; height: 40px; color: var(--primary); }
+        #success-screen h2 { color: var(--text-main); font-size: 24px; margin-bottom: 12px; }
+        #success-screen p { color: var(--text-muted); font-size: 16px; line-height: 1.5; margin-bottom: 30px; }
+        .btn-secondary { background: #f3f4f6; color: var(--text-main); box-shadow: none; border: 1px solid var(--border-light); }
     </style>
 </head>
 <body>
 
-<div class="container" id="app-container">
-    <div id="form-view">
-        <h2>LAPOR JIMPITAN RT 16</h2>
-        <form id="jimpitanForm">
-            <div class="form-group">
-                <label>1. Nama Petugas</label>
-                <input type="text" id="petugas" required placeholder="Ketik nama Anda">
-            </div>
-            <div class="form-group">
-                <label>2. Jumlah Jimpitan (Rp)</label>
-                <input type="text" id="nominal_display" required placeholder="Contoh: 50.000">
-                <input type="hidden" id="nominal_raw">
-            </div>
-            <div class="form-group">
-                <label>3. Foto Hasil Jimpitan</label>
-                <input type="file" id="foto" accept="image/*" capture="environment" required>
-                <img id="preview" alt="Pratinjau Foto">
-            </div>
-            <div class="form-group">
-                <label>4. PIN RT (Keamanan)</label>
-                <input type="password" id="pin" pattern="[0-9]*" inputmode="numeric" required placeholder="4 digit PIN">
-            </div>
-            <button type="submit" class="btn" id="submitBtn">KIRIM LAPORAN</button>
-        </form>
-    </div>
+    <header class="app-header">
+        <h1>DATA JIMPITAN RT 16</h1>
+        <p>Tegalyoso, Klaten</p>
+    </header>
 
-    <div id="success-screen">
-        <div class="success-icon">✓</div>
-        <h2 style="color: #2ecc71;">LAPORAN BERHASIL!</h2>
-        <p>Data jimpitan sudah tercatat di kas RT. Terima kasih atas tugasnya hari ini.</p>
-        <button class="btn" style="background: #3498db;" onclick="window.location.reload()">Lapor Lagi</button>
+    <div class="container">
+        <div class="card" id="form-view">
+            <form id="jimpitanForm">
+                <div class="form-group">
+                    <label>Nama Petugas</label>
+                    <input type="text" id="petugas" required placeholder="Cth: Pak Budi">
+                </div>
+
+                <div class="form-group">
+                    <label>Jumlah Jimpitan (Rp)</label>
+                    <input type="text" id="nominal_display" required inputmode="numeric" placeholder="Cth: 50.000">
+                    <input type="hidden" id="nominal_raw">
+                </div>
+
+                <div class="form-group">
+                    <label>Bukti Foto</label>
+                    <label class="upload-area" id="upload-label">
+                        <div class="upload-icon">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        </div>
+                        <div class="upload-text">Ambil Foto Uang</div>
+                        <div class="upload-subtext">Ketuk di sini untuk membuka kamera</div>
+                        <input type="file" id="foto" accept="image/*" capture="environment" required>
+                    </label>
+                    <img id="preview" alt="Pratinjau Foto">
+                </div>
+
+                <div class="form-group" style="margin-top: 32px;">
+                    <label>PIN Keamanan</label>
+                    <input type="password" id="pin" pattern="[0-9]*" inputmode="numeric" required placeholder="Masukkan PIN RT">
+                </div>
+
+                <button type="submit" class="btn-submit" id="submitBtn">Kirim Laporan</button>
+            </form>
+        </div>
+
+        <div id="success-screen">
+            <div class="success-circle">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+            </div>
+            <h2>Mantap!</h2>
+            <p>Laporan jimpitan sudah masuk ke kas RT. Terima kasih atas kerja kerasnya hari ini.</p>
+            <button class="btn-submit btn-secondary" onclick="window.location.reload()">Lapor Kembali</button>
+        </div>
     </div>
-</div>
 
 <script>
+    // JANGAN LUPA: Ganti teks di bawah ini dengan URL GAS Anda yang asli
     const GAS_URL = "https://script.google.com/macros/s/AKfycbzyBqlnkincqHI-MRGMeDJ-O7MQ28KinPZqijEIhX07J1ab-KcIKNMhq6gqu3F6fXiLBg/exec";
+    
     const nominalDisplay = document.getElementById('nominal_display');
     const nominalRaw = document.getElementById('nominal_raw');
     const fotoInput = document.getElementById('foto');
     const preview = document.getElementById('preview');
+    const uploadLabel = document.getElementById('upload-label');
     let base64Image = "";
 
-    // Format Otomatis Rupiah saat mengetik
     nominalDisplay.addEventListener('input', function(e) {
         let value = this.value.replace(/\D/g, "");
         nominalRaw.value = value;
         this.value = value ? new Intl.NumberFormat('id-ID').format(value) : "";
     });
 
-    // Ambil Gambar dan Kompresi Otomatis di Sisi Klien (Client-Side)
     fotoInput.addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
@@ -80,7 +237,6 @@
         reader.onload = function(event) {
             const img = new Image();
             img.onload = function() {
-                // Set batas resolusi maksimal untuk menghemat ukuran file
                 const max_width = 800;
                 let width = img.width;
                 let height = img.height;
@@ -96,17 +252,23 @@
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0, width, height);
 
-                // Kompresi kualitas gambar ke JPEG 70% (Ukuran menyusut drastis menjadi ~100kb)
                 base64Image = canvas.toDataURL('image/jpeg', 0.7);
+                
+                // Ubah UI setelah foto diambil
                 preview.src = base64Image;
                 preview.style.display = 'block';
+                uploadLabel.style.display = 'none'; // Sembunyikan tombol kamera setelah ada foto
             };
             img.src = event.target.result;
         };
         reader.readAsDataURL(file);
     });
 
-    // Proses Submit (Menerapkan Optimistic UI)
+    // Pratinjau bisa diklik untuk foto ulang
+    preview.addEventListener('click', () => {
+        fotoInput.click();
+    });
+
     document.getElementById('jimpitanForm').addEventListener('submit', function(e) {
         e.preventDefault();
         
@@ -117,19 +279,18 @@
             pin: document.getElementById('pin').value
         };
 
-        // Teknik Optimistic UI: Tampilkan layar sukses langsung agar lansia tidak menunggu loading lama
         document.getElementById('form-view').style.display = 'none';
         document.getElementById('success-screen').style.display = 'block';
+        window.scrollTo(0, 0);
 
-        // Proses pengiriman berjalan asinkronus di latar belakang
         fetch(GAS_URL, {
             method: 'POST',
-            mode: 'no-cors', // Menghindari kendala CORS di Google Apps Script
+            mode: 'no-cors',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         })
-        .then(() => console.log("Data berhasil terkirim ke latar belakang"))
-        .catch(err => alert("Terjadi gangguan pengiriman, harap hubungi admin: " + err));
+        .then(() => console.log("Data berhasil terkirim"))
+        .catch(err => alert("Terjadi gangguan: " + err));
     });
 </script>
 </body>
