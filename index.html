@@ -157,6 +157,53 @@
         #success-screen h2 { color: var(--text-main); font-size: 24px; margin-bottom: 12px; }
         #success-screen p { color: var(--text-muted); font-size: 16px; line-height: 1.5; margin-bottom: 30px; }
         .btn-secondary { background: #f3f4f6; color: var(--text-main); box-shadow: none; border: 1px solid var(--border-light); }
+
+        /* Bottom Navigation */
+.bottom-nav {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: white; border-top: 1px solid var(--border-light);
+    display: flex; justify-content: space-around;
+    padding-bottom: env(safe-area-inset-bottom); /* Aman untuk iPhone */
+    z-index: 1000; box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
+}
+.nav-item {
+    flex: 1; text-align: center; padding: 12px 0;
+    color: var(--text-muted); font-size: 12px; font-weight: 600;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+}
+.nav-item.active { color: var(--primary); }
+.nav-item svg { width: 24px; height: 24px; }
+
+/* Filter Pills */
+.filter-container {
+    display: flex; gap: 10px; overflow-x: auto; padding: 10px 0;
+    scrollbar-width: none;
+}
+.filter-pill {
+    background: #f3f4f6; border: 1px solid #d1d5db;
+    padding: 8px 16px; border-radius: 20px; font-size: 14px;
+    white-space: nowrap; font-weight: 600; color: var(--text-main);
+}
+.filter-pill.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+/* History Card */
+.history-card {
+    background: white; border-radius: 12px; padding: 16px;
+    margin-bottom: 12px; border: 1px solid var(--border-light);
+    display: flex; justify-content: space-between; align-items: center;
+}
+.history-info p { margin: 0; }
+.history-date { font-size: 12px; color: var(--text-muted); }
+.history-name { font-size: 16px; font-weight: 700; margin: 4px 0; }
+.history-amount { font-size: 18px; font-weight: 700; color: var(--primary); }
+.btn-edit { background: none; border: none; color: #f59e0b; padding: 8px; cursor: pointer; }
+
+/* Modal Edit */
+.modal-overlay {
+    display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center;
+}
+.modal-content { background: white; padding: 24px; border-radius: 20px; width: 90%; max-width: 400px; }
     </style>
 </head>
 <body>
@@ -166,51 +213,50 @@
         <p>Tegalyoso, Klaten</p>
     </header>
 
-    <div class="container">
-        <div class="card" id="form-view">
-            <form id="jimpitanForm">
-                <div class="form-group">
-                    <label>Nama Petugas</label>
-                    <input type="text" id="petugas" required placeholder="Cth: Pak Budi">
-                </div>
+    <div class="container" id="page-lapor">
+   </div>
 
-                <div class="form-group">
-                    <label>Jumlah Jimpitan (Rp)</label>
-                    <input type="text" id="nominal_display" required inputmode="numeric" placeholder="Cth: 50.000">
-                    <input type="hidden" id="nominal_raw">
-                </div>
+<div class="container" id="page-riwayat" style="display: none;">
+    <div class="filter-container">
+        <div class="filter-pill active" onclick="setFilter('semua')">Semua Waktu</div>
+        <div class="filter-pill" onclick="setFilter('bulan')">Bulan Ini</div>
+        <div class="filter-pill" onclick="setFilter('hari')">Hari Ini</div>
+    </div>
+    
+    <div id="history-list" style="margin-top: 16px;">
+        <p style="text-align: center; color: gray;">Memuat data...</p>
+    </div>
+</div>
 
-                <div class="form-group">
-                    <label>Bukti Foto</label>
-                    <label class="upload-area" id="upload-label">
-                        <div class="upload-icon">
-                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                        </div>
-                        <div class="upload-text">Ambil Foto Uang</div>
-                        <div class="upload-subtext">Ketuk di sini untuk membuka kamera</div>
-                        <input type="file" id="foto" accept="image/*" capture="environment" required>
-                    </label>
-                    <img id="preview" alt="Pratinjau Foto">
-                </div>
+<div class="bottom-nav">
+    <div class="nav-item active" id="nav-lapor" onclick="switchPage('lapor')">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+        Lapor
+    </div>
+    <div class="nav-item" id="nav-riwayat" onclick="switchPage('riwayat')">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+        Riwayat
+    </div>
+</div>
 
-                <div class="form-group" style="margin-top: 32px;">
-                    <label>PIN Keamanan</label>
-                    <input type="password" id="pin" pattern="[0-9]*" inputmode="numeric" required placeholder="Masukkan PIN RT">
-                </div>
-
-                <button type="submit" class="btn-submit" id="submitBtn">Kirim Laporan</button>
-            </form>
+<div class="modal-overlay" id="editModal">
+    <div class="modal-content">
+        <h3 style="margin-bottom: 16px;">Koreksi Laporan</h3>
+        <input type="hidden" id="edit-baris">
+        <div class="form-group">
+            <label>Nominal Seharusnya (Rp)</label>
+            <input type="number" id="edit-nominal" class="input-modern" placeholder="Cth: 50000">
         </div>
-
-        <div id="success-screen">
-            <div class="success-circle">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-            </div>
-            <h2>Mantap!</h2>
-            <p>Laporan jimpitan sudah masuk ke kas RT. Terima kasih atas kerja kerasnya hari ini.</p>
-            <button class="btn-submit btn-secondary" onclick="window.location.reload()">Lapor Kembali</button>
+        <div class="form-group">
+            <label>PIN RT</label>
+            <input type="password" id="edit-pin" class="input-modern" placeholder="Masukkan PIN">
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <button class="btn-submit" style="background: #ef4444;" onclick="closeModal()">Batal</button>
+            <button class="btn-submit" onclick="simpanEdit()">Simpan</button>
         </div>
     </div>
+</div>
 
 <script>
     // JANGAN LUPA: Ganti teks di bawah ini dengan URL GAS Anda yang asli
@@ -292,6 +338,80 @@
         .then(() => console.log("Data berhasil terkirim"))
         .catch(err => alert("Terjadi gangguan: " + err));
     });
+    // Navigasi Antar Halaman
+function switchPage(page) {
+    document.getElementById('page-lapor').style.display = page === 'lapor' ? 'block' : 'none';
+    document.getElementById('page-riwayat').style.display = page === 'riwayat' ? 'block' : 'none';
+    
+    document.getElementById('nav-lapor').classList.toggle('active', page === 'lapor');
+    document.getElementById('nav-riwayat').classList.toggle('active', page === 'riwayat');
+
+    if(page === 'riwayat') muatRiwayat();
+}
+
+// Fungsi Tarik Data Riwayat (GET)
+let dataRiwayatGlobal = [];
+function muatRiwayat() {
+    document.getElementById('history-list').innerHTML = '<p style="text-align: center; color: gray;">Memuat data mutakhir...</p>';
+    fetch(GAS_URL)
+        .then(res => res.json())
+        .then(data => {
+            dataRiwayatGlobal = data;
+            renderRiwayat(dataRiwayatGlobal);
+        })
+        .catch(err => {
+            document.getElementById('history-list').innerHTML = '<p style="color: red;">Gagal memuat data.</p>';
+        });
+}
+
+// Fungsi Menampilkan Riwayat ke Layar
+function renderRiwayat(data) {
+    const container = document.getElementById('history-list');
+    container.innerHTML = '';
+    
+    data.forEach(item => {
+        container.innerHTML += `
+            <div class="history-card">
+                <div class="history-info">
+                    <div class="history-date">${item.waktu}</div>
+                    <div class="history-name">${item.petugas}</div>
+                    <div class="history-amount">Rp ${new Intl.NumberFormat('id-ID').format(item.nominal)}</div>
+                </div>
+                <button class="btn-edit" onclick="bukaModalEdit(${item.baris}, ${item.nominal})">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                </button>
+            </div>
+        `;
+    });
+}
+
+// Logika Edit Modal
+function bukaModalEdit(baris, nominalLama) {
+    document.getElementById('edit-baris').value = baris;
+    document.getElementById('edit-nominal').value = nominalLama;
+    document.getElementById('editModal').style.display = 'flex';
+}
+function closeModal() { document.getElementById('editModal').style.display = 'none'; }
+
+function simpanEdit() {
+    const payload = {
+        action: "edit",
+        baris: document.getElementById('edit-baris').value,
+        nominal_baru: document.getElementById('edit-nominal').value,
+        pin: document.getElementById('edit-pin').value
+    };
+
+    closeModal();
+    document.getElementById('history-list').innerHTML = '<p style="text-align: center; color: var(--primary);">Menyimpan perubahan...</p>';
+
+    fetch(GAS_URL, {
+        method: 'POST', mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    }).then(() => {
+        setTimeout(muatRiwayat, 1500); // Reload data setelah diedit
+    });
+}
 </script>
 </body>
 </html>
