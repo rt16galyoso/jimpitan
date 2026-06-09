@@ -1,0 +1,16 @@
+{
+  "name": "Sistem Jimpitan RT 16",
+  "short_name": "Jimpitan RT16",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#f4f6f9",
+  "theme_color": "#2ecc71",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2454/2454261.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
